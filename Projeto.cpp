@@ -2,11 +2,18 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <numeric>
-
+#include <cmath>
 using namespace std;
 
+string verify(string input);
+int index(vector<int> vec, int server);
+
 int main(){
+    // string input;
+    // cout << "Arquivo: ";
+    // cin >> input;
+    // input = verify(input);
+
     ifstream myfile ("input.txt");
     int n,m,p;
     vector<int> b, tempVect;
@@ -54,20 +61,19 @@ int main(){
     i = 0, j = 0;
     int min_c;
 
-    while(j < n && i < m){
+    while(j < n){
         for(int s=0;s<c.size();s++){
             tempVect.push_back(c[s][j]);
         }
 
         min_c = *min_element(tempVect.begin(), tempVect.end());
+        i = index(tempVect, min_c);
+
         if(capacidade_atual[i] + t[i][j] <= b[i]){
             capacidade_atual[i] += t[i][j];
             jobs_list_server[i][j] = 1;
-            j++;
         }
-        else{
-            i++;
-        }
+        j++;
         tempVect.clear();
     }
 
@@ -83,7 +89,21 @@ int main(){
             }
         }
     }
-    cout << custo_total << endl;
+    cout << "Custo total: " << custo_total << endl;
 
     return 0;
+}
+
+
+string verify(string input){
+    string end = ".txt";
+    
+    if((input.length() >= end.length()) && (input.compare(input.length()-end.length(), end.length(), end)))
+        return input+end;
+    else
+        return input;
+}
+int index(vector<int> vec, int server){
+    auto it = find(vec.begin(), vec.end(), server);
+    return (it - vec.begin());
 }
