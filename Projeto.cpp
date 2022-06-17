@@ -4,21 +4,28 @@
 #include <algorithm>
 using namespace std;
 
+
+vector<vector<int>> t, c;
+vector<int> b;
+int n,m,p;
+
+
 string verify(string input);
-int index(vector<int> vec, int server);
+void Busca_Local_VND(vector<vector<int>> &sol_m, vector<int> &sol, vector<int> &capacidade, int custo_total, int r);
+void Best_Fit(vector<vector<int>> &sol_m, vector<int> &sol, vector<int> &capacidade_atual);
+
 
 int main(){
-    // string input;
-    // cout << "Arquivo: ";
-    // cin >> input;
-    // input = verify(input);
+    string input;
+    cout << "Arquivo: ";
+    cin >> input;
+    input = verify(input);
 
-    ifstream myfile ("input.txt");
-    int n,m,p;
-    vector<int> b, tempVect;
-    vector<vector<int>> t, c;
+    ifstream myfile (input);
+    vector<int> tempVect;
     int temp, i, j;
 
+    /* --------------------------------------------------------- */
     if(myfile.is_open()){
         while (myfile.good()){
             myfile >> n;
@@ -54,41 +61,52 @@ int main(){
         cout << "Error" << endl;
     }
 
-
-    vector<vector<int>> jobs_list_server(m, vector<int>(n,0));
-    vector<int> capacidade_atual(m,0);
+    /* --------------------------------------------------------- */
+    vector<vector<int>> sol_m(m, vector<int>(n,0));
+    vector<int> capacidade_atual(m,0), sol;
     i = 0, j = 0;
-    int min_c;
 
     while(j < n){
         for(int s=0;s<c.size();s++){
             tempVect.push_back(c[s][j]);
         }
 
-        min_c = *min_element(tempVect.begin(), tempVect.end());
-        i = index(tempVect, min_c);
+        i = min_element(tempVect.begin(), tempVect.end()) - tempVect.begin();
 
         if(capacidade_atual[i] + t[i][j] <= b[i]){
             capacidade_atual[i] += t[i][j];
-            jobs_list_server[i][j] = 1;
+            sol_m[i][j] = 1;
+            sol.push_back(i);
+        }
+        else{
+            sol.push_back(-1);
         }
         j++;
         tempVect.clear();
     }
+    /* --------------------------------------------------------- */
 
+    /* --------------------------------------------------------- */
     int custo_total = 0;
     for(j=0;j<n;j++){
-        for(i=0;i<m;i++){
-            if(jobs_list_server[i][j] == 1){
-                custo_total += c[i][j];
-                break;
-            }
-            if(i == m-1){
-                custo_total += p;
-            }
+        i = sol[j];
+        if(i != -1){
+            custo_total += c[i][j];
         }
+        else{
+            custo_total += p;
+        }
+        
     }
     cout << "Custo total: " << custo_total << endl;
+
+    for(auto& i : sol_m){
+        cout << "| ";
+        for(auto& j : i)
+            cout << j << " | ";
+        cout << endl;
+    }
+    cout << endl;
 
     return 0;
 }
@@ -101,8 +119,4 @@ string verify(string input){
         return input+end;
     else
         return input;
-}
-int index(vector<int> vec, int server){
-    auto it = find(vec.begin(), vec.end(), server);
-    return (it - vec.begin());
 }
